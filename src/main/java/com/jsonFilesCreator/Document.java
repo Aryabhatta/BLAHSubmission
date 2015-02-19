@@ -1,8 +1,8 @@
-package main.java.jsonFilesCreator;
+package main.java.com.jsonFilesCreator;
 
 import java.util.ArrayList;
 
-import main.java.utils.Entity;
+import main.java.com.utils.Entity;
 
 public class Document {
 	

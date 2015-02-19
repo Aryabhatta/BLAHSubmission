@@ -1,4 +1,4 @@
-package main.java.interFileCreator;
+package main.java.com.interFileCreator;
 import java.util.ArrayList;
 import java.util.TreeMap;
 

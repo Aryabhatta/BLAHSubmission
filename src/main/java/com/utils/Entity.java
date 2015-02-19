@@ -1,4 +1,4 @@
-package main.java.utils;
+package main.java.com.utils;
 
 public class Entity implements Comparable<Entity>{
 	public enum EntityType{

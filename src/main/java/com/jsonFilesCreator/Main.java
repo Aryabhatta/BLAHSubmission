@@ -1,4 +1,4 @@
-package main.java.jsonFilesCreator;
+package main.java.com.jsonFilesCreator;
 
 
 import java.io.BufferedReader;
@@ -10,17 +10,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import main.java.utils.Entity;
-import main.java.utils.Entity.EntityPart;
-import main.java.utils.Entity.EntityType;
-import main.java.utils.Filter;
-import main.java.utils.JsonReader;
-import main.java.utils.Relation;
+import main.java.com.utils.Entity;
+import main.java.com.utils.Filter;
+import main.java.com.utils.JsonReader;
+import main.java.com.utils.Relation;
+import main.java.com.utils.Entity.EntityPart;
+import main.java.com.utils.Entity.EntityType;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-public class Driver {
+public class Main {
 
 	public static void main(String[] args) {
 		

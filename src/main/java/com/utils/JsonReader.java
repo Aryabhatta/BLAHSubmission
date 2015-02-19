@@ -1,4 +1,4 @@
-package main.java.utils;
+package main.java.com.utils;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import main.java.utils.Entity.EntityType;
+import main.java.com.utils.Entity.EntityType;
 
 public class JsonReader {
 

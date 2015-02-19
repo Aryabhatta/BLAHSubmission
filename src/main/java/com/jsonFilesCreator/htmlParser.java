@@ -1,4 +1,4 @@
-package main.java.jsonFilesCreator;
+package main.java.com.jsonFilesCreator;
 
 import java.io.File;
 import java.io.IOException;

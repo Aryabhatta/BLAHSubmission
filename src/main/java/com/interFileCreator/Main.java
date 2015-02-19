@@ -1,4 +1,4 @@
-package main.java.interFileCreator;
+package main.java.com.interFileCreator;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import main.java.utils.Entity;
-import main.java.utils.Filter;
-import main.java.utils.JsonReader;
+import main.java.com.utils.Entity;
+import main.java.com.utils.Filter;
+import main.java.com.utils.JsonReader;
 
-public class Driver {
+public class Main {
 
 	public static void main(String[] args) {
 		String jsonDirectory = "/home/shrikant/NLPRE/shrikant-master-thesis/LocTextCorpus/annotations/";
