@@ -87,10 +87,23 @@ public class Main {
 		for(File newFile:fileList) {
 
 			htmlParser parser = new htmlParser(newFile.getAbsolutePath());
+			
+			String pubmedId = "";
+			String jsonFilePath = "";
+			
+			if(newFile.getName().contains(".plain.html")) {
+				pubmedId = newFile.getName().substring(newFile.getName().lastIndexOf('-')+1, newFile.getName().indexOf(".plain.html"));
+				jsonFilePath = jsonDirectory + newFile.getName().replace(".plain.html", ".ann.json");
+				
+				//skip PMC files
+				if(pubmedId.contains("PMC")) {
+					continue;
+				}
+			} else {
+				pubmedId = newFile.getName().replace(".html", "");
+				jsonFilePath = jsonDirectory + pubmedId + ".json";
+			}
 
-			String pubmedId = newFile.getName().replace(".html", "");
-
-			String jsonFilePath = jsonDirectory + pubmedId + ".json";
 			JsonReader reader = new JsonReader(jsonFilePath);			
 
 			if(outputType==1) {
