@@ -17,8 +17,8 @@ public class htmlParser {
 		try {
 			doc = Jsoup.parse(input,"UTF-8");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Error parsing html file : "  + absFilePath);
+			return;
 		}
 	}
 	
