@@ -38,7 +38,7 @@ public class Main {
 			System.out.println("6. [concatString]-Optional: string used for concatenating title and abstract. By default space is used for concatenation \n\n");
 			return;
 		}
-		String titleAbsConcatStr = " ";
+		String titleAbsConcatStr = "\n";
 
 		String htmlDirectory = args[0];
 		if(htmlDirectory.charAt(htmlDirectory.length()-1)!='/') {
