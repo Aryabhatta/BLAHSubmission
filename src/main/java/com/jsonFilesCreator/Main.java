@@ -133,7 +133,8 @@ public class Main {
 		jsonObject.put("text", titleText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
-
+		jsonObject.put("div_id", 0);
+		
 		int entCounter = 1;
 
 		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
@@ -217,6 +218,7 @@ public class Main {
 		jsonObject.put("text", abstractText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
+		jsonObject.put("div_id", 0);
 
 		int entCounter = 1;
 
@@ -301,6 +303,7 @@ public class Main {
 		jsonObject.put("text", concatenatedText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
+		jsonObject.put("div_id", 0);
 
 		int entCounter = 1;
 
