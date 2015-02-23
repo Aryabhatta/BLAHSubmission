@@ -450,7 +450,7 @@ public class Main {
 						retString.toLowerCase().contains("organism") ||
 						retString.toLowerCase().contains("location")){
 
-                  retString = getUnormalizedId(ent.getType());
+                  retString = EntityType.Protein.namespacePrefix + getUnormalizedId(ent.getType());
 				} else {
 					if(ent.getType()==EntityType.Protein){
 						if(retString.contains(",")) {
@@ -463,6 +463,7 @@ public class Main {
 								}
 								concatenatedUrls += EntityType.Protein.namespacePrefix + tokens[i];
 							}
+                            retString = concatenatedUrls;
 						} else {
 							retString = EntityType.Protein.namespacePrefix + retString;
 						}
@@ -479,6 +480,8 @@ public class Main {
 				}
 			}
 		}
+
+        retString = retString.replaceAll("\\s+", ""); //clean spaces
 
 		return retString;
 	}
