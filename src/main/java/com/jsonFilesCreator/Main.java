@@ -22,6 +22,8 @@ import org.json.simple.JSONObject;
 
 public class Main {
 
+  private static String DEFAULT_TITLE_ABSTRACT_CONCATENATION_STR = "\n";
+
   private static String getUnormalizedId(EntityType entityType) {
     return "";
   }
@@ -39,10 +41,10 @@ public class Main {
 			System.out.println("\t if outputType=1, separate json files for title and abstract");
 			System.out.println("\t if outputType=2, combined file by concatenating title and abstract");
 			System.out.println("\t if outputType=3, all possible files (separate and combined) are produced");
-			System.out.println("6. [concatString]-Optional: string used for concatenating title and abstract. By default space is used for concatenation \n\n");
+			System.out.println("6. [concatString]-Optional: string used for concatenating title and abstract. By default newline is used for concatenation \n\n");
 			return;
 		}
-		String titleAbsConcatStr = "\n";
+		String titleAbsConcatStr = DEFAULT_TITLE_ABSTRACT_CONCATENATION_STR;
 
 		String htmlDirectory = args[0];
 		if(htmlDirectory.charAt(htmlDirectory.length()-1)!='/') {
