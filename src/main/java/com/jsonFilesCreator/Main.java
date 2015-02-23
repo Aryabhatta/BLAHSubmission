@@ -23,7 +23,7 @@ import org.json.simple.JSONObject;
 public class Main {
 
 	public static void main(String[] args) {
-/**/	
+/**/
 		if(args.length < 5) {
 			System.out.println("Usage: ");
 			System.out.println("java -jar jsonFilesCreator-1.0.one-jar.jar [pathToHTMLfiles] [pathToJSONfiles] [intermediateFilePath] [outputDirectory] [outputType] [concatString]\n");
@@ -56,21 +56,21 @@ public class Main {
 		if(outputDirectory.charAt(outputDirectory.length()-1)!='/') {
 			outputDirectory += "/";
 		}
-		
+
 		int outputType = Integer.parseInt(args[4]);
 
 		if(args.length==6) {
 			titleAbsConcatStr = args[5];
 		}
-/**/		
+/**/
 
-/*		
+/*
 		String titleAbsConcatStr = " ";
 		String htmlDirectory = "/home/shrikant/NLPRE/shrikant-master-thesis/LocTextCorpus/html/";
 		String jsonDirectory = "/home/shrikant/NLPRE/shrikant-master-thesis/LocTextCorpus/annotations/";
 		String intermediateFilePath = "workDir/interFile.tsv";
 		String outputDirectory = "workDir/jsonFiles/";
-		int outputType=3; 
+		int outputType=3;
 */
 
 		boolean allowPORelations = false;
@@ -87,14 +87,14 @@ public class Main {
 		for(File newFile:fileList) {
 
 			htmlParser parser = new htmlParser(newFile.getAbsolutePath());
-			
+
 			String pubmedId = "";
 			String jsonFilePath = "";
-			
+
 			if(newFile.getName().contains(".plain.html")) {
 				pubmedId = newFile.getName().substring(newFile.getName().lastIndexOf('-')+1, newFile.getName().indexOf(".plain.html"));
 				jsonFilePath = jsonDirectory + newFile.getName().replace(".plain.html", ".ann.json");
-				
+
 				//skip PMC files
 				if(pubmedId.contains("PMC")) {
 					continue;
@@ -104,17 +104,17 @@ public class Main {
 				jsonFilePath = jsonDirectory + pubmedId + ".json";
 			}
 
-			JsonReader reader = new JsonReader(jsonFilePath);			
+			JsonReader reader = new JsonReader(jsonFilePath);
 
 			if(outputType==1) {
 				writeTitleJsonFile(pubmedId, docList, docIndex,parser,reader,outputDirectory, allowPORelations);
 				writeAbstractJsonFile(pubmedId, docList, docIndex,parser,reader,outputDirectory, titleAbsConcatStr, allowPORelations);
 			} else if(outputType==2) {
-				writeJsonFile(pubmedId, docList, docIndex,parser,reader,outputDirectory, titleAbsConcatStr, allowPORelations);	
+				writeJsonFile(pubmedId, docList, docIndex,parser,reader,outputDirectory, titleAbsConcatStr, allowPORelations);
 			} else if(outputType==3) {
 				writeTitleJsonFile(pubmedId, docList, docIndex,parser,reader,outputDirectory, allowPORelations);
 				writeAbstractJsonFile(pubmedId, docList, docIndex,parser,reader,outputDirectory, titleAbsConcatStr, allowPORelations);
-				writeJsonFile(pubmedId, docList, docIndex,parser,reader,outputDirectory, titleAbsConcatStr, allowPORelations);	
+				writeJsonFile(pubmedId, docList, docIndex,parser,reader,outputDirectory, titleAbsConcatStr, allowPORelations);
 			} else {
 				System.err.println("Invalid output type. See Usage. Valid options are 1,2 or 3");
 			}
@@ -128,13 +128,13 @@ public class Main {
 
 		JSONObject jsonObject = new JSONObject();
 
-		String titleText = parser.getTitle(); 
+		String titleText = parser.getTitle();
 
 		jsonObject.put("text", titleText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
 		jsonObject.put("div_id", 0);
-		
+
 		int entCounter = 1;
 
 		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
@@ -160,7 +160,7 @@ public class Main {
 			entObj.put("obj", normalizedId);
 			denotationArr.add(entObj);
 		}
-		
+
 		jsonObject.put("denotations", denotationArr);
 
 		// Write Relations Now
@@ -171,7 +171,7 @@ public class Main {
 			Entity protEntity = rel.getProteinEntity();
 			Entity nonProtEntity = rel.getNonProteinEntity();
 
-			if(!allowPORelations && 
+			if(!allowPORelations &&
 					nonProtEntity.getType()==EntityType.Organism){
 				continue;
 			}
@@ -193,7 +193,7 @@ public class Main {
 			relObj.put("obj", idMap.get(nonProtEntity.getStart()));
 			relationArr.add(relObj);
 		}
-		
+
 		jsonObject.put("relations", relationArr);
 
 		String outputFilePath = outputDirectory + pubmedId + "-title.json";
@@ -254,7 +254,7 @@ public class Main {
 			Entity protEntity = rel.getProteinEntity();
 			Entity nonProtEntity = rel.getNonProteinEntity();
 
-			if(!allowPORelations && 
+			if(!allowPORelations &&
 					nonProtEntity.getType()==EntityType.Organism){
 				continue;
 			}
@@ -273,7 +273,7 @@ public class Main {
 				relObj.put("pred", "belongsTo");
 			}
 
-			int nonProtEntStart = nonProtEntity.getStart();					
+			int nonProtEntStart = nonProtEntity.getStart();
 			relObj.put("obj", idMap.get(nonProtEntStart));
 			relationArr.add(relObj);
 		}
@@ -287,7 +287,7 @@ public class Main {
 		} catch (IOException e) {
 			System.err.println("Error writing file: " + outputFilePath);
 		}
-		
+
 	}
 
 	private static void writeJsonFile(String pubmedId,
@@ -361,7 +361,7 @@ public class Main {
 			Entity protEntity = rel.getProteinEntity();
 			Entity nonProtEntity = rel.getNonProteinEntity();
 
-			if(!allowPORelations && 
+			if(!allowPORelations &&
 					nonProtEntity.getType()==EntityType.Organism){
 				continue;
 			}
@@ -388,7 +388,7 @@ public class Main {
 			Entity protEntity = rel.getProteinEntity();
 			Entity nonProtEntity = rel.getNonProteinEntity();
 
-			if(!allowPORelations && 
+			if(!allowPORelations &&
 					nonProtEntity.getType()==EntityType.Organism){
 				continue;
 			}
@@ -407,7 +407,7 @@ public class Main {
 				relObj.put("pred", "belongsTo");
 			}
 
-			int nonProtEntStart = nonProtEntity.getStart() + offSetAddition;					
+			int nonProtEntStart = nonProtEntity.getStart() + offSetAddition;
 			relObj.put("obj", idMap.get(nonProtEntStart));
 			relationArr.add(relObj);
 		}
@@ -440,7 +440,7 @@ public class Main {
 			if(ent.getStart()==start && ent.getEnd()==end){
 				retString = ent.getNormalizedIdentifier();
 				if(retString.equals("TODO") ||
-						retString.toLowerCase().contains("protein") ||						
+						retString.toLowerCase().contains("protein") ||
 						retString.toLowerCase().contains("organism") ||
 						retString.toLowerCase().contains("location")){
 					if(ent.getType()==EntityType.Protein){
@@ -454,26 +454,26 @@ public class Main {
 					if(ent.getType()==EntityType.Protein){
 						if(retString.contains(",")) {
 							String tokens[] = retString.split(",");
-							
+
 							String concatenatedUrls = "";
 							for(int i=0; i<tokens.length; i++){
 								if(!concatenatedUrls.isEmpty()) {
 									concatenatedUrls += ",";
 								}
-								concatenatedUrls += "http://identifiers.org/uniprot/" + tokens[i];
+								concatenatedUrls += EntityType.Protein.namespacePrefix + tokens[i];
 							}
 						} else {
-							retString = "http://identifiers.org/uniprot/" + retString;	
+							retString = EntityType.Protein.namespacePrefix + retString;
 						}
 					} else if(ent.getType()==EntityType.Location){
 						String tokens[] = retString.split("\\s+");
 						if(tokens[0].substring(0,3).equals("GO:")) {
-							retString = "http://identifiers.org/go/" + tokens[0]; // first term should be go term	
+							retString = EntityType.Location.namespacePrefix + tokens[0]; // first term should be go term
 						} else {
 							retString = "Location";
 						}
 					} else if(ent.getType()==EntityType.Organism){
-						retString = "http://identifiers.org/taxonomy/" + retString;
+						retString = EntityType.Organism.namespacePrefix + retString;
 					}
 				}
 			}
@@ -498,7 +498,7 @@ public class Main {
 		} catch (IOException e) {
 			System.err.println("Error reading file: " + intermediateFilePath);
 			return;
-		} 
+		}
 
 		String line;
 		try {
@@ -521,7 +521,7 @@ public class Main {
 				if(tokens[2].equals("Location")){
 					ent.setType(EntityType.Location);
 				} else if(tokens[2].equals("Organism")){
-					ent.setType(EntityType.Organism);					
+					ent.setType(EntityType.Organism);
 				} else if(tokens[2].equals("Protein")){
 					ent.setType(EntityType.Protein);
 				}

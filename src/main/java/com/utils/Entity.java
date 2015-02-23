@@ -1,12 +1,19 @@
 package main.java.com.utils;
 
 public class Entity implements Comparable<Entity>{
-	public enum EntityType{
-		Protein,
-		Location,
-		Organism
+
+	public enum EntityType {
+      Protein("uniprot"),
+      Location("go"),
+      Organism("taxonomy");
+
+      public final String namespacePrefix;
+
+      EntityType(String x) {
+        this.namespacePrefix = x;
+      }
 	};
-	
+
 	public enum EntityPart{
 		title,
 		abs
@@ -15,9 +22,9 @@ public class Entity implements Comparable<Entity>{
 	private int end; // ending pos + 1
 	private String text;
 	private EntityType type;
-	private EntityPart part; 	
+	private EntityPart part;
 	private String normalizedIdentifier;
-	
+
 	public int getStart() {
 		return start;
 	}
@@ -51,7 +58,7 @@ public class Entity implements Comparable<Entity>{
 	@Override
 	public int compareTo(Entity arg0) {
 		// TODO Auto-generated method stub
-		return (int)(start-arg0.getStart());	
+		return (int)(start-arg0.getStart());
 	}
 	public String getNormalizedIdentifier() {
 		return normalizedIdentifier;
