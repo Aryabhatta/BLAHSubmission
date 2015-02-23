@@ -22,6 +22,10 @@ import org.json.simple.JSONObject;
 
 public class Main {
 
+  private static String getUnormalizedId(EntityType entityType) {
+    return "";
+  }
+
 	public static void main(String[] args) {
 /**/
 		if(args.length < 5) {
@@ -443,13 +447,8 @@ public class Main {
 						retString.toLowerCase().contains("protein") ||
 						retString.toLowerCase().contains("organism") ||
 						retString.toLowerCase().contains("location")){
-					if(ent.getType()==EntityType.Protein){
-						retString = "Protein";
-					} else if(ent.getType()==EntityType.Location){
-						retString = "Location";
-					} else if(ent.getType()==EntityType.Organism){
-						retString = "Organism";
-					}
+
+                  retString = getUnormalizedId(ent.getType());
 				} else {
 					if(ent.getType()==EntityType.Protein){
 						if(retString.contains(",")) {
@@ -470,7 +469,7 @@ public class Main {
 						if(tokens[0].substring(0,3).equals("GO:")) {
 							retString = EntityType.Location.namespacePrefix + tokens[0]; // first term should be go term
 						} else {
-							retString = "Location";
+                          retString = getUnormalizedId(EntityType.Location);
 						}
 					} else if(ent.getType()==EntityType.Organism){
 						retString = EntityType.Organism.namespacePrefix + retString;
