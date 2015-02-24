@@ -3,9 +3,9 @@ package main.java.com.utils;
 public class Entity implements Comparable<Entity>{
 
 	public enum EntityType {
-      Protein("uniprot/"),
-      Location("go/"),
-      Organism("taxonomy/");
+      Protein("uniprot:"),
+      Location("go:"),
+      Organism("taxonomy:");
 
       public final String namespacePrefix;
 
