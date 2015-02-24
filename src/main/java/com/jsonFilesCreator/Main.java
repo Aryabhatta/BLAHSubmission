@@ -154,7 +154,7 @@ public class Main {
 		jsonObject.put("text", titleText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
-		jsonObject.put("div_id", 0);
+		jsonObject.put("divid", 0);
 
 		int entCounter = 1;
 
