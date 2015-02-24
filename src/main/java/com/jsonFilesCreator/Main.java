@@ -523,7 +523,7 @@ public class Main {
 					} else if(ent.getType()==EntityType.Location){
 						String tokens[] = retString.split("\\s+");
 						if(tokens[0].substring(0,3).equals("GO:")) {
-							retString = EntityType.Location.namespacePrefix + tokens[0]; // first term should be go term
+							retString = EntityType.Location.namespacePrefix + tokens[0].replace("GO:", ""); // first term should be go term
 						} else {
                           retString = getUnormalizedId(EntityType.Location);
 						}
