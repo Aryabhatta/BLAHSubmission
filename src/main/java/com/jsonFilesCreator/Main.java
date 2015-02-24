@@ -71,7 +71,7 @@ public class Main {
 /**/
 
 /*
-		String titleAbsConcatStr = " ";
+		String titleAbsConcatStr = DEFAULT_TITLE_ABSTRACT_CONCATENATION_STR;
 		String htmlDirectory = "/home/shrikant/NLPRE/shrikant-master-thesis/LocTextCorpus/html/";
 		String jsonDirectory = "/home/shrikant/NLPRE/shrikant-master-thesis/LocTextCorpus/annotations/";
 		String intermediateFilePath = "workDir/interFile.tsv";
@@ -230,7 +230,7 @@ public class Main {
 		jsonObject.put("text", abstractText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
-		jsonObject.put("div_id", 0);
+		jsonObject.put("divid", 0);
 
 		int entCounter = 1;
 
@@ -308,7 +308,7 @@ public class Main {
 		jsonObject.put("text", concatenatedText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
-		jsonObject.put("div_id", 0);
+		jsonObject.put("divid", 0);
 
 		int entCounter = 1;
 
