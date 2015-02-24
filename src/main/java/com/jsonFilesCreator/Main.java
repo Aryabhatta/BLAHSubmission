@@ -79,6 +79,7 @@ public class Main {
 		int outputType=3;
 */
 
+		// TODO: Change this flag to true if Protein-Organism relations are to be considered as well
 		boolean allowPORelations = false;
 
 		// read normalized file
@@ -86,17 +87,19 @@ public class Main {
 		HashMap<String,Integer> docIndex = new HashMap<String, Integer>();
 		readIntermediateFile(intermediateFilePath, docList,docIndex);
 
-		// Reading HTML files
+		// finding and iterating over HTML files in html directory
 		Filter files = new Filter();
 		File[] fileList = files.finder(htmlDirectory, ".html");
 
 		for(File newFile:fileList) {
 
+			// Read html file
 			htmlParser parser = new htmlParser(newFile.getAbsolutePath());
 
 			String pubmedId = "";
 			String jsonFilePath = "";
 
+			// construct the name of json file depending on the name of html file
 			if(newFile.getName().contains(".plain.html")) {
 				pubmedId = newFile.getName().substring(newFile.getName().lastIndexOf('-')+1, newFile.getName().indexOf(".plain.html"));
 				jsonFilePath = jsonDirectory + newFile.getName().replace(".plain.html", ".ann.json");
@@ -110,6 +113,7 @@ public class Main {
 				jsonFilePath = jsonDirectory + pubmedId + ".json";
 			}
 
+			// Read json file
 			JsonReader reader = new JsonReader(jsonFilePath);
 
 			if(outputType==1) {
@@ -127,6 +131,17 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Method to write json files in pubAnnotation format only for the title entities and relations
+	 *
+	 * @param pubmedId
+	 * @param docList
+	 * @param docIndex
+	 * @param parser
+	 * @param reader
+	 * @param outputDirectory
+	 * @param allowPORelations
+	 */
 	private static void writeTitleJsonFile(String pubmedId,
 			ArrayList<Document> docList, HashMap<String, Integer> docIndex,
 			htmlParser parser, JsonReader reader, String outputDirectory,
@@ -143,36 +158,27 @@ public class Main {
 
 		int entCounter = 1;
 
+		// map for storing entity identifier with their start position, to be used for relation objects
 		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
 
 		JSONArray denotationArr = new JSONArray();
-		for(Entity ent:reader.getTitleEntities()){
-			JSONObject entObj = new JSONObject();
-			String identifier = "T" + entCounter++;
-			entObj.put("id", identifier);
 
-			JSONObject spanObj = new JSONObject();
+		// iterate over entities found in tagtog json files
+		for(Entity ent:reader.getTitleEntities()){
 			int start = ent.getStart();
 			int end = ent.getEnd();
 
-			idMap.put(start, identifier);
-
-			spanObj.put("begin", start);
-			spanObj.put("end", end );
-
-			entObj.put("span", spanObj);
-
-			String normalizedId = searchNormalizedId(pubmedId, docList, docIndex, "title", start, end);
-			entObj.put("obj", normalizedId);
-			denotationArr.add(entObj);
+			entCounter = addEntityObject(start, end, ent, pubmedId, idMap,
+					docList, docIndex, entCounter, denotationArr);
 		}
 
 		jsonObject.put("denotations", denotationArr);
 
-		// Write Relations Now
+		// Writing Relations Now
 		int relCounter=1;
 		JSONArray relationArr = new JSONArray();
 
+		// iterate over relations found in tagtog json files
 		for(Relation rel:reader.getTitleRelations()){
 			Entity protEntity = rel.getProteinEntity();
 			Entity nonProtEntity = rel.getNonProteinEntity();
@@ -181,23 +187,11 @@ public class Main {
 					nonProtEntity.getType()==EntityType.Organism){
 				continue;
 			}
+			int protEntStart = protEntity.getStart();
+			int nonProtEntStart = nonProtEntity.getStart();
 
-			JSONObject relObj = new JSONObject();
-			String identifier = "R" + relCounter++;
-
-			relObj.put("id", identifier);
-
-			int entStart = protEntity.getStart();
-			relObj.put("subj", idMap.get(entStart));
-
-			if(nonProtEntity.getType()==EntityType.Location){
-				relObj.put("pred", "localizeTo");
-			} else {
-				relObj.put("pred", "belongsTo");
-			}
-
-			relObj.put("obj", idMap.get(nonProtEntity.getStart()));
-			relationArr.add(relObj);
+			relCounter = addRelationObject(protEntStart, nonProtEntStart, nonProtEntity,
+					relCounter, idMap, relationArr);
 		}
 
 		jsonObject.put("relations", relationArr);
@@ -212,6 +206,18 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Method to write json files in pubAnnotation format only for abstract entities and relations
+	 *
+	 * @param pubmedId
+	 * @param docList
+	 * @param docIndex
+	 * @param parser
+	 * @param reader
+	 * @param outputDirectory
+	 * @param titleAbsConcatStr
+	 * @param allowPORelations
+	 */
 	private static void writeAbstractJsonFile(String pubmedId,
 			ArrayList<Document> docList, HashMap<String, Integer> docIndex,
 			htmlParser parser, JsonReader reader, String outputDirectory,
@@ -228,34 +234,26 @@ public class Main {
 
 		int entCounter = 1;
 
+		// map for storing entity identifier with their start position, to be used for relation objects
 		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
 
 		JSONArray denotationArr = new JSONArray();
-		for(Entity ent:reader.getAbsEntities()){
-			JSONObject entObj = new JSONObject();
-			String identifier = "T" + entCounter++;
-			entObj.put("id", identifier);
 
-			JSONObject spanObj = new JSONObject();
+		// iterate over entities found in tagtog json files
+		for(Entity ent:reader.getAbsEntities()){
 			int start = ent.getStart();
 			int end = ent.getEnd();
 
-			idMap.put(start, identifier);
-
-			spanObj.put("begin", start);
-			spanObj.put("end", end );
-
-			entObj.put("span", spanObj);
-
-			String normalizedId = searchNormalizedId(pubmedId, docList, docIndex, "abs", ent.getStart(), ent.getEnd());
-			entObj.put("obj", normalizedId);
-			denotationArr.add(entObj);
+			entCounter = addEntityObject(start, end, ent, pubmedId, idMap,
+					docList, docIndex, entCounter, denotationArr);
 		}
 		jsonObject.put("denotations", denotationArr);
 
 		// Write Relations Now
 		int relCounter=1;
 		JSONArray relationArr = new JSONArray();
+
+		// iterate over relations found in tagtog json files
 		for(Relation rel:reader.getAbsRelations()){
 			Entity protEntity = rel.getProteinEntity();
 			Entity nonProtEntity = rel.getNonProteinEntity();
@@ -264,24 +262,10 @@ public class Main {
 					nonProtEntity.getType()==EntityType.Organism){
 				continue;
 			}
-
-			JSONObject relObj = new JSONObject();
-			String identifier = "R" + relCounter++;
-
-			relObj.put("id", identifier);
-
 			int protEntStart = protEntity.getStart();
-			relObj.put("subj", idMap.get(protEntStart));
-
-			if(nonProtEntity.getType()==EntityType.Location){
-				relObj.put("pred", "localizeTo");
-			} else {
-				relObj.put("pred", "belongsTo");
-			}
-
 			int nonProtEntStart = nonProtEntity.getStart();
-			relObj.put("obj", idMap.get(nonProtEntStart));
-			relationArr.add(relObj);
+
+			relCounter = addRelationObject(protEntStart, nonProtEntStart, nonProtEntity, relCounter, idMap, relationArr);
 		}
 		jsonObject.put("relations", relationArr);
 
@@ -296,6 +280,19 @@ public class Main {
 
 	}
 
+	/**
+	 * Method to write json files in PubAnnotation format - title and
+	 * abstract is concatenated with a concatString
+	 *
+	 * @param pubmedId
+	 * @param docList
+	 * @param docIndex
+	 * @param parser
+	 * @param reader
+	 * @param outputDirectory
+	 * @param titleAbsConcatStr
+	 * @param allowPORelations
+	 */
 	private static void writeJsonFile(String pubmedId,
 			ArrayList<Document> docList, HashMap<String, Integer> docIndex,
 			htmlParser parser, JsonReader reader, String outputDirectory,
@@ -304,6 +301,8 @@ public class Main {
 		JSONObject jsonObject = new JSONObject();
 
 		String concatenatedText = parser.getTitle() + titleAbsConcatStr + parser.getAbstract();
+
+		// calculate offset to be added for abstract entities
 		int offSetAddition = parser.getTitle().length()+titleAbsConcatStr.length();
 
 		jsonObject.put("text", concatenatedText);
@@ -316,46 +315,23 @@ public class Main {
 		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
 
 		JSONArray denotationArr = new JSONArray();
-		for(Entity ent:reader.getTitleEntities()){
-			JSONObject entObj = new JSONObject();
-			String identifier = "T" + entCounter++;
-			entObj.put("id", identifier);
 
-			JSONObject spanObj = new JSONObject();
+		// iterate over title entities found in tagtog json files
+		for(Entity ent:reader.getTitleEntities()){
 			int start = ent.getStart();
 			int end = ent.getEnd();
 
-			idMap.put(start, identifier);
-
-			spanObj.put("begin", start);
-			spanObj.put("end", end );
-
-			entObj.put("span", spanObj);
-
-			String normalizedId = searchNormalizedId(pubmedId, docList, docIndex, "title", start, end);
-			entObj.put("obj", normalizedId);
-			denotationArr.add(entObj);
+			entCounter = addEntityObject(start, end, ent, pubmedId, idMap,
+					docList, docIndex, entCounter, denotationArr);
 		}
 
+		// iterate over abstract entities found in tagtog json files
 		for(Entity ent:reader.getAbsEntities()){
-			JSONObject entObj = new JSONObject();
-			String identifier = "T" + entCounter++;
-			entObj.put("id", identifier);
-
-			JSONObject spanObj = new JSONObject();
 			int start = ent.getStart() + offSetAddition;
 			int end = ent.getEnd() + offSetAddition;
 
-			idMap.put(start, identifier);
-
-			spanObj.put("begin", start);
-			spanObj.put("end", end );
-
-			entObj.put("span", spanObj);
-
-			String normalizedId = searchNormalizedId(pubmedId, docList, docIndex, "abs", ent.getStart(), ent.getEnd());
-			entObj.put("obj", normalizedId);
-			denotationArr.add(entObj);
+			entCounter = addEntityObject(start, end, ent, pubmedId, idMap,
+					docList, docIndex, entCounter, denotationArr);
 		}
 		jsonObject.put("denotations", denotationArr);
 
@@ -363,6 +339,7 @@ public class Main {
 		int relCounter=1;
 		JSONArray relationArr = new JSONArray();
 
+		// iterate over title relations found in tagtog json files
 		for(Relation rel:reader.getTitleRelations()){
 			Entity protEntity = rel.getProteinEntity();
 			Entity nonProtEntity = rel.getNonProteinEntity();
@@ -371,25 +348,15 @@ public class Main {
 					nonProtEntity.getType()==EntityType.Organism){
 				continue;
 			}
+			int protEntStart = protEntity.getStart();
+			int nonProtEntStart = nonProtEntity.getStart();
 
-			JSONObject relObj = new JSONObject();
-			String identifier = "R" + relCounter++;
 
-			relObj.put("id", identifier);
-
-			int entStart = protEntity.getStart();
-			relObj.put("subj", idMap.get(entStart));
-
-			if(nonProtEntity.getType()==EntityType.Location){
-				relObj.put("pred", "localizeTo");
-			} else {
-				relObj.put("pred", "belongsTo");
-			}
-
-			relObj.put("obj", idMap.get(nonProtEntity.getStart()));
-			relationArr.add(relObj);
+			relCounter = addRelationObject(protEntStart, nonProtEntStart, nonProtEntity,
+					relCounter, idMap, relationArr);
 		}
 
+		// iterate over abstract relations found in tagtog json files
 		for(Relation rel:reader.getAbsRelations()){
 			Entity protEntity = rel.getProteinEntity();
 			Entity nonProtEntity = rel.getNonProteinEntity();
@@ -399,23 +366,10 @@ public class Main {
 				continue;
 			}
 
-			JSONObject relObj = new JSONObject();
-			String identifier = "R" + relCounter++;
-
-			relObj.put("id", identifier);
-
 			int protEntStart = protEntity.getStart()+offSetAddition;
-			relObj.put("subj", idMap.get(protEntStart));
-
-			if(nonProtEntity.getType()==EntityType.Location){
-				relObj.put("pred", "localizeTo");
-			} else {
-				relObj.put("pred", "belongsTo");
-			}
-
 			int nonProtEntStart = nonProtEntity.getStart() + offSetAddition;
-			relObj.put("obj", idMap.get(nonProtEntStart));
-			relationArr.add(relObj);
+
+			relCounter = addRelationObject(protEntStart, nonProtEntStart, nonProtEntity, relCounter, idMap, relationArr);
 		}
 		jsonObject.put("relations", relationArr);
 
@@ -429,22 +383,117 @@ public class Main {
 		}
 	}
 
-	private static String searchNormalizedId(String pubmedId,
+	/**
+	 * Creates a relation json object and puts it in relation array
+	 *
+	 * @param protEntStart
+	 * @param nonProtEntStart
+	 * @param nonProtEntity
+	 * @param relCounter
+	 * @param idMap
+	 * @param relationArr
+	 * @return
+	 */
+	private static int addRelationObject(int protEntStart, int nonProtEntStart,
+			Entity nonProtEntity, int relCounter,
+			HashMap<Integer, String> idMap, JSONArray relationArr) {
+
+		JSONObject relObj = new JSONObject();
+		String identifier = "R" + relCounter++;
+
+		relObj.put("id", identifier);
+
+		// retrieving entity identifier from the map
+		relObj.put("subj", idMap.get(protEntStart));
+
+		if(nonProtEntity.getType()==EntityType.Location){
+			relObj.put("pred", "localizeTo");
+		} else {
+			relObj.put("pred", "belongsTo");
+		}
+
+		// retrieving entity identifier from the map
+		relObj.put("obj", idMap.get(nonProtEntStart));
+		relationArr.add(relObj);
+		return relCounter;
+	}
+
+	/**
+	 * Creates a entity object and puts it in denotation array
+	 *
+	 * @param start
+	 * @param end
+	 * @param ent
+	 * @param pubmedId
+	 * @param idMap
+	 * @param docList
+	 * @param docIndex
+	 * @param entCounter
+	 * @param denotationArr
+	 * @return
+	 */
+	private static int addEntityObject(int start, int end, Entity ent,
+			String pubmedId, HashMap<Integer, String> idMap,
 			ArrayList<Document> docList, HashMap<String, Integer> docIndex,
-			String part, int start, int end) {
+			int entCounter, JSONArray denotationArr) {
+
 		Document doc = docList.get(docIndex.get(pubmedId));
+
+		// searches normalized id for this tagtog json entity
+		// in the list of normalized ids in intermediate file
+		String normalizedId = searchNormalizedId(doc, ent);
+
+		// Repeating objects for multiple normalizable entities
+		String normalizedIdTokens[] = normalizedId.split(","); // Do not split it if you do not want multiple objects for multiple normalizable entities
+
+		for(int i=0; i<normalizedIdTokens.length; i++){
+			JSONObject entObj = new JSONObject();
+			String identifier = "T" + entCounter++;
+			entObj.put("id", identifier);
+
+			JSONObject spanObj = new JSONObject();
+
+			// add only first identifier in case of multiple objects
+			if(!idMap.containsKey(start)) {
+				idMap.put(start, identifier);
+			}
+
+			spanObj.put("begin", start);
+			spanObj.put("end", end );
+
+			entObj.put("span", spanObj);
+
+			String id = normalizedIdTokens[i];
+			entObj.put("obj", id);
+			denotationArr.add(entObj);
+		}
+
+		return entCounter;
+	}
+
+	/**
+	 * Search normalized identifier for the jsonEntity ent in the list of normalized ids in intermediate file
+	 *
+	 * @param doc
+	 * @param ent
+	 * @return normalized identifier url or set of url's in case of multiple normalized id
+	 */
+	private static String searchNormalizedId(Document doc, Entity jsonEnt) {
 		String retString = "";
 
 		ArrayList<Entity> entList = null;
-		if(part.equals("title")) {
+		if(jsonEnt.getPart()==EntityPart.title) {
 			entList = doc.getTitleEntities();
 		} else {
 			entList = doc.getAbsEntities();
 		}
 
+		// iterating over entity list found in intermediate file
 		for(Entity ent:entList){
-			if(ent.getStart()==start && ent.getEnd()==end){
+			if(ent.getStart()==jsonEnt.getStart() && ent.getEnd()==jsonEnt.getEnd()){
 				retString = ent.getNormalizedIdentifier();
+
+				// if still not normalized
 				if(retString.equals("TODO") ||
 						retString.toLowerCase().contains("protein") ||
 						retString.toLowerCase().contains("organism") ||
@@ -453,6 +502,8 @@ public class Main {
                   retString = EntityType.Protein.namespacePrefix + getUnormalizedId(ent.getType());
 				} else {
 					if(ent.getType()==EntityType.Protein){
+
+						// if multiple normalized ids are present
 						if(retString.contains(",")) {
 							String tokens[] = retString.split(",");
 
@@ -463,7 +514,9 @@ public class Main {
 								}
 								concatenatedUrls += EntityType.Protein.namespacePrefix + tokens[i];
 							}
-                            retString = concatenatedUrls;
+
+							// return concatenated urls
+							retString = concatenatedUrls;
 						} else {
 							retString = EntityType.Protein.namespacePrefix + retString;
 						}
@@ -482,10 +535,15 @@ public class Main {
 		}
 
         retString = retString.replaceAll("\\s+", ""); //clean spaces
-
 		return retString;
 	}
 
+	/**
+	 *  Reads intermediate file and stores all entity information in docList
+	 * @param intermediateFilePath
+	 * @param docList
+	 * @param docIndex
+	 */
 	private static void readIntermediateFile(String intermediateFilePath,
 			ArrayList<Document> docList, HashMap<String, Integer> docIndex) {
 
