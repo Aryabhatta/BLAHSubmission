@@ -159,7 +159,7 @@ public class Main {
 		int entCounter = 1;
 
 		// map for storing entity identifier with their start position, to be used for relation objects
-		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
+		HashMap<Integer,ArrayList<String>> idMap = new HashMap<Integer,ArrayList<String>>();
 
 		JSONArray denotationArr = new JSONArray();
 
@@ -235,7 +235,7 @@ public class Main {
 		int entCounter = 1;
 
 		// map for storing entity identifier with their start position, to be used for relation objects
-		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
+		HashMap<Integer,ArrayList<String>> idMap = new HashMap<Integer,ArrayList<String>>();
 
 		JSONArray denotationArr = new JSONArray();
 
@@ -312,7 +312,7 @@ public class Main {
 
 		int entCounter = 1;
 
-		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
+		HashMap<Integer,ArrayList<String>> idMap = new HashMap<Integer,ArrayList<String>>();
 
 		JSONArray denotationArr = new JSONArray();
 
@@ -396,25 +396,34 @@ public class Main {
 	 */
 	private static int addRelationObject(int protEntStart, int nonProtEntStart,
 			Entity nonProtEntity, int relCounter,
-			HashMap<Integer, String> idMap, JSONArray relationArr) {
+			HashMap<Integer, ArrayList<String>> idMap, JSONArray relationArr) {
 
-		JSONObject relObj = new JSONObject();
-		String identifier = "R" + relCounter++;
+		// retrieving entity identifiers for protein
+		ArrayList<String> protIdentifiers = idMap.get(protEntStart);
+		
+		// retrieving entity identifier for nonProtein entity
+		ArrayList<String> nonProtIdentifiers = idMap.get(nonProtEntStart);
+		
+		for(String protIdentifier:protIdentifiers) {
+			for(String nonProtIdentifier:nonProtIdentifiers){
 
-		relObj.put("id", identifier);
+				JSONObject relObj = new JSONObject();
+				String identifier = "R" + relCounter++;
 
-		// retrieving entity identifier from the map
-		relObj.put("subj", idMap.get(protEntStart));
+				relObj.put("id", identifier);
+				
+				relObj.put("subj", protIdentifier);
 
-		if(nonProtEntity.getType()==EntityType.Location){
-			relObj.put("pred", "localizeTo");
-		} else {
-			relObj.put("pred", "belongsTo");
+				if(nonProtEntity.getType()==EntityType.Location){
+					relObj.put("pred", "localizeTo");
+				} else {
+					relObj.put("pred", "belongsTo");
+				}
+				
+				relObj.put("obj", nonProtIdentifier);
+				relationArr.add(relObj);
+			}
 		}
-
-		// retrieving entity identifier from the map
-		relObj.put("obj", idMap.get(nonProtEntStart));
-		relationArr.add(relObj);
 		return relCounter;
 	}
 
@@ -433,7 +442,7 @@ public class Main {
 	 * @return
 	 */
 	private static int addEntityObject(int start, int end, Entity ent,
-			String pubmedId, HashMap<Integer, String> idMap,
+			String pubmedId, HashMap<Integer, ArrayList<String>> idMap,
 			ArrayList<Document> docList, HashMap<String, Integer> docIndex,
 			int entCounter, JSONArray denotationArr) {
 
@@ -455,7 +464,15 @@ public class Main {
 
 			// add only first identifier in case of multiple objects
 			if(!idMap.containsKey(start)) {
-				idMap.put(start, identifier);
+				ArrayList<String> identifierList = new ArrayList<String>();
+				identifierList.add(identifier);
+				idMap.put(start, identifierList);
+			} else {
+				ArrayList<String> identifierList = idMap.get(start);
+				if(!identifierList.contains(identifier)) {
+					identifierList.add(identifier);
+					idMap.put(start, identifierList);
+				}
 			}
 
 			spanObj.put("begin", start);
