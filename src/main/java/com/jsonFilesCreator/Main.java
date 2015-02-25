@@ -71,7 +71,7 @@ public class Main {
 /**/
 
 /*
-		String titleAbsConcatStr = " ";
+		String titleAbsConcatStr = DEFAULT_TITLE_ABSTRACT_CONCATENATION_STR;
 		String htmlDirectory = "/home/shrikant/NLPRE/shrikant-master-thesis/LocTextCorpus/html/";
 		String jsonDirectory = "/home/shrikant/NLPRE/shrikant-master-thesis/LocTextCorpus/annotations/";
 		String intermediateFilePath = "workDir/interFile.tsv";
@@ -159,7 +159,7 @@ public class Main {
 		int entCounter = 1;
 
 		// map for storing entity identifier with their start position, to be used for relation objects
-		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
+		HashMap<Integer,ArrayList<String>> idMap = new HashMap<Integer,ArrayList<String>>();
 
 		JSONArray denotationArr = new JSONArray();
 
@@ -230,12 +230,12 @@ public class Main {
 		jsonObject.put("text", abstractText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
-		jsonObject.put("div_id", 0);
+		jsonObject.put("divid", 0);
 
 		int entCounter = 1;
 
 		// map for storing entity identifier with their start position, to be used for relation objects
-		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
+		HashMap<Integer,ArrayList<String>> idMap = new HashMap<Integer,ArrayList<String>>();
 
 		JSONArray denotationArr = new JSONArray();
 
@@ -308,11 +308,11 @@ public class Main {
 		jsonObject.put("text", concatenatedText);
 		jsonObject.put("sourcedb", "PubMed");
 		jsonObject.put("sourceid",pubmedId);
-		jsonObject.put("div_id", 0);
+		jsonObject.put("divid", 0);
 
 		int entCounter = 1;
 
-		HashMap<Integer,String> idMap = new HashMap<Integer,String>();
+		HashMap<Integer,ArrayList<String>> idMap = new HashMap<Integer,ArrayList<String>>();
 
 		JSONArray denotationArr = new JSONArray();
 
@@ -396,25 +396,34 @@ public class Main {
 	 */
 	private static int addRelationObject(int protEntStart, int nonProtEntStart,
 			Entity nonProtEntity, int relCounter,
-			HashMap<Integer, String> idMap, JSONArray relationArr) {
+			HashMap<Integer, ArrayList<String>> idMap, JSONArray relationArr) {
 
-		JSONObject relObj = new JSONObject();
-		String identifier = "R" + relCounter++;
+		// retrieving entity identifiers for protein
+		ArrayList<String> protIdentifiers = idMap.get(protEntStart);
+		
+		// retrieving entity identifier for nonProtein entity
+		ArrayList<String> nonProtIdentifiers = idMap.get(nonProtEntStart);
+		
+		for(String protIdentifier:protIdentifiers) {
+			for(String nonProtIdentifier:nonProtIdentifiers){
 
-		relObj.put("id", identifier);
+				JSONObject relObj = new JSONObject();
+				String identifier = "R" + relCounter++;
 
-		// retrieving entity identifier from the map
-		relObj.put("subj", idMap.get(protEntStart));
+				relObj.put("id", identifier);
+				
+				relObj.put("subj", protIdentifier);
 
-		if(nonProtEntity.getType()==EntityType.Location){
-			relObj.put("pred", "localizeTo");
-		} else {
-			relObj.put("pred", "belongsTo");
+				if(nonProtEntity.getType()==EntityType.Location){
+					relObj.put("pred", "localizeTo");
+				} else {
+					relObj.put("pred", "belongsTo");
+				}
+				
+				relObj.put("obj", nonProtIdentifier);
+				relationArr.add(relObj);
+			}
 		}
-
-		// retrieving entity identifier from the map
-		relObj.put("obj", idMap.get(nonProtEntStart));
-		relationArr.add(relObj);
 		return relCounter;
 	}
 
@@ -433,7 +442,7 @@ public class Main {
 	 * @return
 	 */
 	private static int addEntityObject(int start, int end, Entity ent,
-			String pubmedId, HashMap<Integer, String> idMap,
+			String pubmedId, HashMap<Integer, ArrayList<String>> idMap,
 			ArrayList<Document> docList, HashMap<String, Integer> docIndex,
 			int entCounter, JSONArray denotationArr) {
 
@@ -455,7 +464,15 @@ public class Main {
 
 			// add only first identifier in case of multiple objects
 			if(!idMap.containsKey(start)) {
-				idMap.put(start, identifier);
+				ArrayList<String> identifierList = new ArrayList<String>();
+				identifierList.add(identifier);
+				idMap.put(start, identifierList);
+			} else {
+				ArrayList<String> identifierList = idMap.get(start);
+				if(!identifierList.contains(identifier)) {
+					identifierList.add(identifier);
+					idMap.put(start, identifierList);
+				}
 			}
 
 			spanObj.put("begin", start);
@@ -523,7 +540,7 @@ public class Main {
 					} else if(ent.getType()==EntityType.Location){
 						String tokens[] = retString.split("\\s+");
 						if(tokens[0].substring(0,3).equals("GO:")) {
-							retString = EntityType.Location.namespacePrefix + tokens[0]; // first term should be go term
+							retString = EntityType.Location.namespacePrefix + tokens[0].replace("GO:", ""); // first term should be go term
 						} else {
                           retString = getUnormalizedId(EntityType.Location);
 						}
