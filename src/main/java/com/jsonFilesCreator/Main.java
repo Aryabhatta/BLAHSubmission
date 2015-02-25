@@ -25,7 +25,7 @@ public class Main {
   private static String DEFAULT_TITLE_ABSTRACT_CONCATENATION_STR = "\n";
 
   private static String getUnormalizedId(EntityType entityType) {
-    return "";
+    return entityType.namespacePrefix;
   }
 
 	public static void main(String[] args) {
